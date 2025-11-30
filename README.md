@@ -26,4 +26,10 @@ The scraper collects the following statistics for MVP candidates:
 - **Team Record**: Wins, Losses, Win Percentage
 - **Past Winner**: Binary indicator if player has won MVP before
 
-#### In current state it is only scraping MVP names with over 100 voting points
+## CURRENT VERSION
+- Scrapes MVP votes and saves to csv
+- Pulls most relevant stats
+
+## TO BE IMPLEMENTED
+- Advanced Stats scraping/calculating
+- Fix team W-L to properly scrape or find a workaround
