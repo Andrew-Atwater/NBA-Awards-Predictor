@@ -4,3 +4,4 @@ pandas>=2.0.0
 lxml>=4.9.0
 selenium>=4.15.0
 webdriver-manager>=4.0.0
+nba_api>=1.1.0
