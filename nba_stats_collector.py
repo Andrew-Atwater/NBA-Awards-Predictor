@@ -91,10 +91,20 @@ class NBAStatsCollector:
             }
             team = None
             
+            wins = 0
+            losses = 0
+            
             for row in rows:
                 row_dict = dict(zip(headers, row))
                 if team is None:
-                    team = row_dict.get('MATCHUP', '').split()[0]
+                    team = row_dict.get('MATCHUP', '').split()[0]  # Get team abbreviation
+                
+                # Track W/L from game log
+                wl = row_dict.get('WL', '')
+                if wl == 'W':
+                    wins += 1
+                elif wl == 'L':
+                    losses += 1
                 
                 totals['MIN'] += row_dict.get('MIN', 0) or 0
                 totals['PTS'] += row_dict.get('PTS', 0) or 0
@@ -125,11 +135,13 @@ class NBAStatsCollector:
                 'FG_PCT': round(fg_pct, 1),
                 'FG3_PCT': round(fg3_pct, 1),
                 'FT_PCT': round(ft_pct, 1),
-                'TEAM': team or 'N/A'
+                'TEAM': team or 'N/A',
+                'TEAM_WINS': wins,
+                'TEAM_LOSSES': losses
             }
             
         except Exception as e:
-            print(f"    Error getting traditional stats: {e}")
+            print(f"Error getting Big 5 stats: {e}")
             return None
     
     def _get_advanced_stats(self, player_id, season):
@@ -144,12 +156,11 @@ class NBAStatsCollector:
         }
     
     def get_team_record(self, team_abbr, season):
-        # Getting team W-L doesn't work yet
-        url = f"{self.base_url}/teamyearbyyearstats"
+        url = f"{self.base_url}/leaguestandingsv3"
         params = {
-            'TeamID': self._get_team_id(team_abbr),
-            'SeasonType': 'Regular Season',
-            'PerMode': 'Totals'
+            'LeagueID': '00',
+            'Season': season,
+            'SeasonType': 'Regular Season'
         }
         
         try:
@@ -162,15 +173,54 @@ class NBAStatsCollector:
             
             for row in rows:
                 row_dict = dict(zip(headers, row))
-                if row_dict.get('YEAR') == season:
-                    wins = row_dict.get('WINS', 0)
-                    losses = row_dict.get('LOSSES', 0)
+                team_abbrev = row_dict.get('TeamAbbreviation', '')
+                
+                # Match by abbreviation
+                if team_abbrev == team_abbr:
+                    wins = row_dict.get('WINS', row_dict.get('W', 0))
+                    losses = row_dict.get('LOSSES', row_dict.get('L', 0))
                     return f"{wins}-{losses}"
+            
+            # If not found, try alternate method with team info
+            team_id = self._get_team_id(team_abbr)
+            if team_id and team_id != '0':
+                return self._get_team_record_by_id(team_id, season)
             
             return "N/A"
             
         except Exception as e:
             print(f"    Error getting team record: {e}")
+            team_id = self._get_team_id(team_abbr)
+            if team_id and team_id != '0':
+                return self._get_team_record_by_id(team_id, season)
+            return "N/A"
+    
+    def _get_team_record_by_id(self, team_id, season):
+        """Backup method to get team record using team ID"""
+        url = f"{self.base_url}/teaminfocommon"
+        params = {
+            'TeamID': team_id,
+            'Season': season,
+            'SeasonType': 'Regular Season'
+        }
+        
+        try:
+            response = requests.get(url, headers=self.headers, params=params, timeout=30)
+            response.raise_for_status()
+            data = response.json()
+            
+            rows = data['resultSets'][0]['rowSet']
+            headers = data['resultSets'][0]['headers']
+            
+            if rows:
+                row_dict = dict(zip(headers, rows[0]))
+                wins = row_dict.get('W', 0)
+                losses = row_dict.get('L', 0)
+                return f"{wins}-{losses}"
+            
+            return "N/A"
+            
+        except Exception as e:
             return "N/A"
     
     def _get_team_id(self, team_abbr):
@@ -247,9 +297,10 @@ class NBAStatsCollector:
             
             past_winner = self.check_past_mvp_winner(player_name, season, mvp_data)
             
+            # Get team record from game log data
             team_record = "N/A"
-            if 'TEAM' in stats:
-                team_record = self.get_team_record(stats['TEAM'], season)
+            if 'TEAM_WINS' in stats and 'TEAM_LOSSES' in stats:
+                team_record = f"{stats['TEAM_WINS']}-{stats['TEAM_LOSSES']}"
             
             result = {
                 'Player': player_name,

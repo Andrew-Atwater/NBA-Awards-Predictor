@@ -28,8 +28,7 @@ The scraper collects the following statistics for MVP candidates:
 
 ## CURRENT VERSION
 - Scrapes MVP votes and saves to csv
-- Pulls most relevant stats
+- Pulls relevant stats: PTS, REB, AST, STL, BLK, Shooting Percentages (FG, 3PT, FT), Team and Team Record.
 
 ## TO BE IMPLEMENTED
 - Advanced Stats scraping/calculating
-- Fix team W-L to properly scrape or find a workaround
