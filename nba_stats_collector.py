@@ -57,10 +57,10 @@ class NBAStatsCollector:
         if traditional_stats:
             stats.update(traditional_stats)
         
-        # Get advanced stats
-        advanced_stats = self._get_advanced_stats(player_id, season)
-        if advanced_stats:
-            stats.update(advanced_stats)
+        # Calculate advanced metrics from basic stats
+        advanced_metrics = self._calculate_advanced_metrics(traditional_stats)
+        if advanced_metrics:
+            stats.update(advanced_metrics)
             
         return stats
     
@@ -144,15 +144,50 @@ class NBAStatsCollector:
             print(f"Error getting Big 5 stats: {e}")
             return None
     
-    def _get_advanced_stats(self, player_id, season):
-        # I'm skipping advanced stats for now but will implement later
-        # Likely will need to use a different method for this as well
+    def _calculate_advanced_metrics(self, stats):
+        if not stats:
+            return {}
+        
+        # Calculate Team Win % from TEAM_WINS and TEAM_LOSSES
+        team_wins = stats.get('TEAM_WINS', 0)
+        team_losses = stats.get('TEAM_LOSSES', 0)
+        if team_wins > 0 or team_losses > 0:
+            team_win_pct = round(team_wins / (team_wins + team_losses) * 100, 1)
+        else:
+            team_win_pct = None
+        
+        # Calculate Game Score (all-around performance metric)
+        game_score = round(
+            stats.get('PTS', 0) + 
+            0.4 * stats.get('REB', 0) + 
+            0.7 * stats.get('AST', 0) + 
+            stats.get('STL', 0) + 
+            0.7 * stats.get('BLK', 0),
+            1
+        )
+        
+        # Calculate Simple PER
+        simple_per = round(
+            (stats.get('PTS', 0) + stats.get('REB', 0) + stats.get('AST', 0) + 
+             stats.get('STL', 0) + stats.get('BLK', 0)) / 5,
+            1
+        )
+        
+        # Calculate Impact Score
+        impact_score = round(
+            stats.get('PTS', 0) * 1.0 +
+            stats.get('REB', 0) * 0.7 +
+            stats.get('AST', 0) * 0.7 +
+            stats.get('STL', 0) * 1.5 +
+            stats.get('BLK', 0) * 1.5,
+            1
+        )
+        
         return {
-            'USG_PCT': None,
-            'OFF_RATING': None,
-            'DEF_RATING': None,
-            'NET_RATING': None,
-            'PIE': None
+            'TEAM_WIN_PCT': team_win_pct,
+            'GAME_SCORE': game_score,
+            'SIMPLE_PER': simple_per,
+            'IMPACT_SCORE': impact_score
         }
     
     def get_team_record(self, team_abbr, season):
@@ -316,13 +351,12 @@ class NBAStatsCollector:
                 'FG_PCT': stats.get('FG_PCT', None),
                 'FG3_PCT': stats.get('FG3_PCT', None),
                 'FT_PCT': stats.get('FT_PCT', None),
-                'USG_PCT': stats.get('USG_PCT', None),
-                'OFF_RATING': stats.get('OFF_RATING', None),
-                'DEF_RATING': stats.get('DEF_RATING', None),
-                'NET_RATING': stats.get('NET_RATING', None),
-                'PIE': stats.get('PIE', None),
                 'TEAM': stats.get('TEAM', 'N/A'),
                 'TEAM_RECORD': team_record,
+                'TEAM_WIN_PCT': stats.get('TEAM_WIN_PCT', None),
+                'GAME_SCORE': stats.get('GAME_SCORE', None),
+                'SIMPLE_PER': stats.get('SIMPLE_PER', None),
+                'IMPACT_SCORE': stats.get('IMPACT_SCORE', None),
                 'PAST_MVP_WINNER': past_winner
             }
             

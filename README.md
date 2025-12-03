@@ -7,7 +7,7 @@ A data collection and analysis project to predict NBA award winners for the 2026
 
 ## Data Collection
 
-The scraper collects the following statistics for MVP candidates:
+The scraper collects the following statistics for MVP candidates from the 99-00 season up to last season, 24-25:
 
 ### Basic Stats
 - **Big 5**: Points (PTS), Rebounds (REB), Assists (AST), Steals (STL), Blocks (BLK)
