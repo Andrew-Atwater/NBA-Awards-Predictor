@@ -16,11 +16,9 @@ The scraper collects the following statistics for MVP candidates from the 99-00 
 - **Shooting Splits**: Field Goal % (FG%), Three-Point % (3P%), Free Throw % (FT%)
 
 ### Advanced Stats
-- **USG%**: Usage Percentage
+- **Game Score**: All-around performance metric
 - **PER**: Player Efficiency Rating
-- **VORP**: Value Over Replacement Player
-- **WS**: Win Shares
-- **BPM**: Box Plus/Minus
+- **Impact Score**: Another all around metric with a heavier weight on defensive stats
 
 ### Team Context
 - **Team Record**: Wins, Losses, Win Percentage
@@ -29,6 +27,7 @@ The scraper collects the following statistics for MVP candidates from the 99-00 
 ## CURRENT VERSION
 - Scrapes MVP votes and saves to csv
 - Pulls relevant stats: PTS, REB, AST, STL, BLK, Shooting Percentages (FG, 3PT, FT), Team and Team Record.
+- Calculates relevant advanced statistics: PER, Game Score, and Impact Score
 
 ## TO BE IMPLEMENTED
-- Advanced Stats scraping/calculating
+- Data analysis and predictions
