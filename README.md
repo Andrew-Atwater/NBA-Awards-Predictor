@@ -28,6 +28,4 @@ The scraper collects the following statistics for MVP candidates from the 99-00 
 - Scrapes MVP votes and saves to csv
 - Pulls relevant stats: PTS, REB, AST, STL, BLK, Shooting Percentages (FG, 3PT, FT), Team and Team Record.
 - Calculates relevant advanced statistics: PER, Game Score, and Impact Score
-
-## TO BE IMPLEMENTED
-- Data analysis and predictions
+- Data analysis and graphs
